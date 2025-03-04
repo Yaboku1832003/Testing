@@ -201,20 +201,28 @@ const initCanvas = (canvasId) => {
     let isDragging = false;
 
     const scratch = (x, y) => {
+        let rect = canvas.getBoundingClientRect();
+        let scaleX = canvas.width / rect.width; // Scale factor for X
+        let scaleY = canvas.height / rect.height; // Scale factor for Y
+
+        let adjustedX = (x - rect.left) * scaleX;
+        let adjustedY = (y - rect.top) * scaleY;
+
         context.globalCompositeOperation = "destination-out";
         context.beginPath();
-        context.arc(x, y, 15, 0, 2 * Math.PI);
+        context.arc(adjustedX, adjustedY, 15, 0, 2 * Math.PI);
         context.fill();
     };
 
+    // Mouse Events
     canvas.addEventListener("mousedown", (event) => {
         isDragging = true;
-        scratch(event.offsetX, event.offsetY);
+        scratch(event.clientX, event.clientY);
     });
 
     canvas.addEventListener("mousemove", (event) => {
         if (isDragging) {
-            scratch(event.offsetX, event.offsetY);
+            scratch(event.clientX, event.clientY);
         }
     });
 
@@ -223,6 +231,28 @@ const initCanvas = (canvasId) => {
     });
 
     canvas.addEventListener("mouseleave", () => {
+        isDragging = false;
+    });
+
+    // Touch Events
+    canvas.addEventListener("touchstart", (event) => {
+        isDragging = true;
+        let touch = event.touches[0];
+        scratch(touch.clientX, touch.clientY);
+    });
+
+    canvas.addEventListener("touchmove", (event) => {
+        if (isDragging) {
+            let touch = event.touches[0];
+            scratch(touch.clientX, touch.clientY);
+        }
+    });
+
+    canvas.addEventListener("touchend", () => {
+        isDragging = false;
+    });
+
+    canvas.addEventListener("touchcancel", () => {
         isDragging = false;
     });
 };
